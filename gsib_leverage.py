@@ -345,21 +345,48 @@ def _ar1_residual(series: pd.Series) -> pd.Series:
 
 def build_factors(asset_usd: pd.DataFrame, equity_usd: pd.DataFrame) -> pd.DataFrame:
     common_idx = asset_usd.index.intersection(equity_usd.index)
-    assets = asset_usd.loc[common_idx].dropna(how="all")
-    equity = equity_usd.loc[assets.index].dropna(how="all")
+    assets = asset_usd.loc[common_idx].sort_index()
+    equity = equity_usd.loc[common_idx].sort_index()
     if assets.empty or equity.empty:
         return pd.DataFrame()
 
-    agg_assets = assets.sum(axis=1, min_count=1)
-    agg_equity = equity.sum(axis=1, min_count=1)
+    valid_counts = assets.notna().sum(axis=1).combine(equity.notna().sum(axis=1), min)
+    min_banks = min(20, int(valid_counts.max()))
+    eligible_dates = valid_counts[valid_counts >= min_banks].index
+    if eligible_dates.empty:
+        return pd.DataFrame()
+    start_date = eligible_dates.min()
+
+    assets = assets.loc[start_date:]
+    equity = equity.loc[start_date:]
+    stable_cols = [
+        col for col in assets.columns
+        if assets[col].notna().all() and equity[col].notna().all()
+    ]
+    if len(stable_cols) < 5:
+        stable_cols = [
+            col for col in assets.columns
+            if assets[col].notna().mean() >= 0.95 and equity[col].notna().mean() >= 0.95
+        ]
+        assets = assets[stable_cols].ffill()
+        equity = equity[stable_cols].ffill()
+    else:
+        assets = assets[stable_cols]
+        equity = equity[stable_cols]
+    if len(stable_cols) < 5:
+        return pd.DataFrame()
+
+    agg_assets = assets.sum(axis=1, min_count=len(stable_cols))
+    agg_equity = equity.sum(axis=1, min_count=len(stable_cols))
     lev_agg = (agg_assets / agg_equity).replace([np.inf, -np.inf], np.nan).dropna()
     lev_agg = lev_agg[lev_agg > 1.0]
     factors = pd.DataFrame({"Lev_Agg": lev_agg})
     factors["Agg_Factor"] = _ar1_residual(factors["Lev_Agg"])
 
     individual_leverage = (assets / equity).replace([np.inf, -np.inf], np.nan).loc[factors.index]
-    shocks = individual_leverage.apply(_ar1_residual).dropna(how="all")
-    shocks = shocks.dropna(axis=0)
+    shocks = individual_leverage.apply(_ar1_residual).dropna(how="all").dropna(axis=0)
+    factors["GIV_PCA_Factor"] = np.nan
+    factors["Cumulative_GIV_PCA"] = np.nan
     if shocks.shape[0] >= 10 and shocks.shape[1] >= 3:
         panel_residuals = shocks.sub(shocks.mean(axis=1), axis=0).sub(shocks.mean(axis=0), axis=1).add(shocks.mean().mean())
         x = panel_residuals.to_numpy(dtype=float)
@@ -369,11 +396,9 @@ def build_factors(asset_usd: pd.DataFrame, equity_usd: pd.DataFrame) -> pd.DataF
         idiosyncratic = pd.DataFrame(x - common, index=panel_residuals.index, columns=panel_residuals.columns)
         weights = assets.shift(1).loc[idiosyncratic.index, idiosyncratic.columns]
         weights = weights.div(weights.sum(axis=1), axis=0)
-        factors["GIV_PCA_Factor"] = (idiosyncratic * weights).sum(axis=1)
-        factors["Cumulative_GIV_PCA"] = factors["GIV_PCA_Factor"].fillna(0).cumsum()
-    else:
-        factors["GIV_PCA_Factor"] = np.nan
-        factors["Cumulative_GIV_PCA"] = np.nan
+        giv = (idiosyncratic * weights).sum(axis=1)
+        factors.loc[giv.index, "GIV_PCA_Factor"] = giv
+        factors.loc[giv.index, "Cumulative_GIV_PCA"] = giv.cumsum()
     factors.index.name = "date"
     return factors
 
