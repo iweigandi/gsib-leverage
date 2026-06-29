@@ -1,0 +1,10 @@
+﻿bank,ticker,filing_source,source_url,coverage_target,notes
+BNP Paribas,BNP.PA,Issuer investor relations,https://group.bnpparibas/en/investors/financial-reports,Annual and interim reports / universal registration documents,Use consolidated total assets and shareholders' equity attributable to equity holders where available.
+Credit Agricole,ACA.PA,Issuer investor relations,https://www.credit-agricole.com/en/finance/financial-publications,Annual and interim reports / universal registration documents,Use Credit Agricole S.A. consolidated data consistently with listed equity.
+Societe Generale,GLE.PA,Issuer investor relations,https://investors.societegenerale.com/en/financial-and-non-financial-information,Annual and interim reports / universal registration documents,Use consolidated balance sheet data.
+Standard Chartered,STAN.L,Issuer investor relations,https://www.sc.com/en/investors/financial-results/,Annual/interim reports and results presentations,Reports are generally in USD.
+Industrial and Commercial Bank of China,1398.HK,Issuer investor relations / HKEX filings,https://www.icbc-ltd.com/en/investor-relations/,Annual/interim/quarterly reports,Use consolidated RMB statements from ICBC official reports.
+China Construction Bank,0939.HK,Issuer investor relations / HKEX filings,http://www.ccb.com/en/investorv3/index.html,Annual/interim/quarterly reports,Use consolidated RMB statements from CCB official reports.
+Bank of China,3988.HK,Issuer investor relations / HKEX filings,https://www.boc.cn/en/investor/,Annual/interim/quarterly reports,Use consolidated RMB statements from BOC official reports.
+Agricultural Bank of China,1288.HK,Issuer investor relations / HKEX filings,https://www.abchina.com/en/investor-relations/,Annual/interim/quarterly reports,Use consolidated RMB statements from ABC official reports.
+Bank of Communications,3328.HK,Issuer investor relations / HKEX filings,https://www.bankcomm.com/BankCommSite/shtml/jyjr/en/list.shtml,Annual/interim/quarterly reports,Use consolidated RMB statements from BOCOM official reports.

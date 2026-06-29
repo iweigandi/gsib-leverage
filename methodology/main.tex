@@ -16,7 +16,7 @@
 }
 
 \title{Public G-SIB Leverage Proxies}
-\author{IvÃ¡n Weigandi}
+\author{IvÃƒÂ¡n Weigandi}
 \date{\today}
 
 \begin{document}
@@ -26,7 +26,7 @@
 
 Large internationally active banks are central intermediaries in global financial markets. Their leverage summarizes the scale of balance-sheet exposures relative to capital and is therefore informative about risk-bearing capacity, deleveraging pressure, and the transmission of financial shocks. In intermediary-based accounts of asset pricing and global liquidity, fluctuations in intermediary net worth can affect risk premia, credit supply, and cross-border financial conditions \citep{adrianshin2010,hekrishnamurthy2013,brunnermeierpedersen2009}. For this reason, leverage measures for global systemically important banks (G-SIBs) are useful indicators for empirical work on financial cycles and systemic risk.
 
-This project provides two complementary public-data proxies. The first is a quarterly book leverage measure based on accounting assets and book equity. The second is a daily market leverage measure that combines book debt with the market value of equity. Non-dollar components are converted into US dollars before computing aggregate quantities. The quarterly measure follows the balance-sheet reporting frequency, while the daily measure responds to changes in equity valuations and therefore provides a higher-frequency signal of changes in bank capitalization.
+This project provides complementary public-data proxies. The first is a quarterly book leverage measure based on accounting assets and book equity. The second is a daily market leverage measure that combines book debt with the market value of equity. For non-SEC banks where free machine-readable fundamentals are shallow, the accounting layer is designed to incorporate audited observations curated from official annual, interim, or quarterly filings. Non-dollar components are converted into US dollars before computing aggregate quantities. The quarterly measure follows the balance-sheet reporting frequency, while the daily measure responds to changes in equity valuations and therefore provides a higher-frequency signal of changes in bank capitalization.
 
 \section{Sample}
 
@@ -68,7 +68,7 @@ The book leverage proxy is close to the accounting concept of assets relative to
 
 \section{Data}
 
-The script uses public market prices, shares outstanding, and financial statement fields available through Yahoo Finance. Coverage depends on the availability and consistency of these fields across jurisdictions and listing venues. For London-listed shares, prices are converted from pence to pounds before computing market capitalization.
+The script uses public market prices, shares outstanding, and financial statement fields available through Yahoo Finance, supplemented by a curated official-filings table for audited balance-sheet observations. The curated table records the reporting date, total assets, book equity, currency, source document, source URL, and source page. Coverage depends on the availability and consistency of filings across jurisdictions and listing venues. For London-listed shares, prices are converted from pence to pounds before computing market capitalization.
 
 \begin{thebibliography}{9}
 

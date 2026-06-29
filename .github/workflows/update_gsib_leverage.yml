@@ -56,4 +56,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Update G-SIB leverage proxies"
-          file_pattern: "data/*.csv chart/*.png Methodology.pdf README.md methodology/main.tex gsib_leverage.py requirements.txt"
+          file_pattern: "data/*.csv chart/*.png source_data/*.csv Methodology.pdf README.md methodology/main.tex gsib_leverage.py requirements.txt"

@@ -20,6 +20,7 @@ DATA_DIR = OUTPUT_DIR / "data"
 CHART_DIR = OUTPUT_DIR / "chart"
 CACHE_DIR = Path(os.environ.get("TEMP", str(OUTPUT_DIR / ".cache"))) / "yfinance-cache-gsib"
 SOURCE_CACHE_DIR = OUTPUT_DIR / ".cache" / "source-data"
+OFFICIAL_BALANCE_SHEET_PATH = OUTPUT_DIR / "source_data" / "official_balance_sheets.csv"
 REQUEST_SLEEP_SECONDS = float(os.environ.get("YF_REQUEST_SLEEP_SECONDS", "2"))
 YF_TIMEOUT_SECONDS = float(os.environ.get("YF_TIMEOUT_SECONDS", "20"))
 USE_HISTORICAL_SHARES = os.environ.get("GSIB_USE_HISTORICAL_SHARES", "0") == "1"
@@ -252,11 +253,51 @@ def convert_to_usd(series: pd.Series, bank: Bank, fx_rates: pd.DataFrame) -> pd.
     return series.astype(float)
 
 
+
+def get_official_balance_sheet(bank: Bank) -> pd.DataFrame:
+    if not OFFICIAL_BALANCE_SHEET_PATH.exists():
+        return pd.DataFrame()
+    try:
+        data = pd.read_csv(OFFICIAL_BALANCE_SHEET_PATH)
+    except Exception:
+        return pd.DataFrame()
+    if data.empty:
+        return pd.DataFrame()
+    mask = data["bank"].eq(bank.name)
+    if bank.ticker:
+        mask = mask | data["ticker"].eq(bank.ticker)
+    data = data.loc[mask].copy()
+    if data.empty:
+        return pd.DataFrame()
+    required = {"period_end", "total_assets", "book_equity"}
+    if not required.issubset(data.columns):
+        return pd.DataFrame()
+    data["period_end"] = pd.to_datetime(data["period_end"], errors="coerce")
+    data["total_assets"] = pd.to_numeric(data["total_assets"], errors="coerce")
+    data["book_equity"] = pd.to_numeric(data["book_equity"], errors="coerce")
+    data = data.dropna(subset=["period_end", "total_assets", "book_equity"])
+    data = data[(data["total_assets"] > 0) & (data["book_equity"] > 0)]
+    if data.empty:
+        return pd.DataFrame()
+    out = data.set_index("period_end").sort_index()
+    out.index = pd.to_datetime(out.index).tz_localize(None)
+    out = out[["total_assets", "book_equity"]].copy()
+    out["statement_frequency"] = data.get("statement_frequency", "official").iloc[0] if "statement_frequency" in data else "official"
+    out["book_debt"] = out["total_assets"] - out["book_equity"]
+    out["book_leverage"] = out["total_assets"] / out["book_equity"]
+    out["balance_sheet_source"] = "official_filings"
+    return out
+
 def get_balance_sheet(bank: Bank) -> pd.DataFrame:
+    official = get_official_balance_sheet(bank)
+    if not official.empty:
+        return official
     assert bank.ticker is not None
     cache_path = SOURCE_CACHE_DIR / f"balance_sheet_{_cache_key(bank.ticker)}.csv"
     cached = _read_cached_frame(cache_path)
     if not cached.empty:
+        if "balance_sheet_source" not in cached:
+            cached["balance_sheet_source"] = "yfinance"
         return cached
     ticker = yf.Ticker(bank.ticker)
     statements = []
@@ -433,6 +474,7 @@ def build_panel() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFram
                     "book_observations": 0,
                     "market_observations": 0,
                     "shares_source": "",
+                    "balance_sheet_source": "",
                     "note": bank.note,
                 }
             )
@@ -457,12 +499,14 @@ def build_panel() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFram
                     "book_observations": 0,
                     "market_observations": 0,
                     "shares_source": "",
+                    "balance_sheet_source": "",
                     "note": f"Download failed: {exc}",
                 }
             )
             continue
 
         has_book = not bs.empty
+        balance_sheet_source = bs["balance_sheet_source"].dropna().iloc[-1] if has_book and "balance_sheet_source" in bs else ""
         has_price = not price.empty
         shares, share_source = get_shares(bank, price.index) if has_price else (pd.Series(dtype=float), "")
 
@@ -522,6 +566,7 @@ def build_panel() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFram
                 "book_observations": int(bs.shape[0]) if has_book else 0,
                 "market_observations": market_obs,
                 "shares_source": share_source,
+                "balance_sheet_source": balance_sheet_source,
                 "note": note,
             }
         )
