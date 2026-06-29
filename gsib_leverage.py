@@ -21,6 +21,7 @@ CHART_DIR = OUTPUT_DIR / "chart"
 CACHE_DIR = Path(os.environ.get("TEMP", str(OUTPUT_DIR / ".cache"))) / "yfinance-cache-gsib"
 SOURCE_CACHE_DIR = OUTPUT_DIR / ".cache" / "source-data"
 REQUEST_SLEEP_SECONDS = float(os.environ.get("YF_REQUEST_SLEEP_SECONDS", "2"))
+YF_TIMEOUT_SECONDS = float(os.environ.get("YF_TIMEOUT_SECONDS", "20"))
 USE_HISTORICAL_SHARES = os.environ.get("GSIB_USE_HISTORICAL_SHARES", "0") == "1"
 
 PALETTE = [
@@ -177,6 +178,7 @@ def _download_with_retries(tickers: list[str] | str, **kwargs) -> pd.DataFrame:
                 auto_adjust=False,
                 progress=False,
                 threads=False,
+                timeout=YF_TIMEOUT_SECONDS,
                 **kwargs,
             )
         except Exception:
@@ -225,7 +227,8 @@ def get_balance_sheet(bank: Bank) -> pd.DataFrame:
     statements = []
     for attr in ["quarterly_balance_sheet", "balance_sheet"]:
         try:
-            frame = getattr(ticker, attr)
+            freq = "quarterly" if attr.startswith("quarterly") else "yearly"
+            frame = ticker.get_balance_sheet(freq=freq)
         except Exception:
             frame = pd.DataFrame()
         if frame is None or frame.empty:
@@ -251,27 +254,6 @@ def get_balance_sheet(bank: Bank) -> pd.DataFrame:
     return out
 
 
-def get_price(bank: Bank) -> pd.Series:
-    assert bank.ticker is not None
-    frame = pd.DataFrame()
-    for attempt in range(3):
-        frame = yf.download(
-            bank.ticker,
-            start=START_DATE,
-            auto_adjust=False,
-            progress=False,
-            threads=False,
-        )
-        if frame is not None and not frame.empty:
-            break
-        time.sleep(REQUEST_SLEEP_SECONDS * (attempt + 1))
-    if frame is None or frame.empty:
-        return pd.Series(dtype=float)
-    close = frame["Close"] if "Close" in frame else frame.iloc[:, 0]
-    close.index = pd.to_datetime(close.index).tz_localize(None)
-    close = pd.to_numeric(close, errors="coerce").dropna()
-    return close * bank.price_scale
-
 
 def get_shares(bank: Bank, dates: pd.DatetimeIndex) -> tuple[pd.Series, str]:
     assert bank.ticker is not None
@@ -286,7 +268,7 @@ def get_shares(bank: Bank, dates: pd.DatetimeIndex) -> tuple[pd.Series, str]:
     source = "unavailable"
     if USE_HISTORICAL_SHARES:
         try:
-            shares = ticker.get_shares_full(start=START_DATE)
+            shares = ticker.get_shares_full(start=START_DATE, timeout=YF_TIMEOUT_SECONDS)
         except Exception:
             shares = pd.Series(dtype=float)
     if shares is not None and len(shares) > 0:
