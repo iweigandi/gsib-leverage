@@ -47,4 +47,4 @@ cd methodology
 latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
 ```
 
-The GitHub Action is configured to refresh the data and chart monthly. If the upstream data provider rate-limits a run, the script fails before committing empty leverage files.
+The GitHub Action is configured to refresh the data and chart monthly. The script batches price downloads, caches statement and shares data across runs, and uses a request delay for the remaining Yahoo Finance calls. If the upstream provider still rate-limits a run, the script fails before committing empty leverage files; in that case, rerun the workflow later.

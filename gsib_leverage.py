@@ -19,7 +19,9 @@ OUTPUT_DIR = Path(__file__).resolve().parent
 DATA_DIR = OUTPUT_DIR / "data"
 CHART_DIR = OUTPUT_DIR / "chart"
 CACHE_DIR = Path(os.environ.get("TEMP", str(OUTPUT_DIR / ".cache"))) / "yfinance-cache-gsib"
+SOURCE_CACHE_DIR = OUTPUT_DIR / ".cache" / "source-data"
 REQUEST_SLEEP_SECONDS = float(os.environ.get("YF_REQUEST_SLEEP_SECONDS", "2"))
+USE_HISTORICAL_SHARES = os.environ.get("GSIB_USE_HISTORICAL_SHARES", "0") == "1"
 
 PALETTE = [
     "#00466F",
@@ -144,8 +146,81 @@ def _pick_row(frame: pd.DataFrame, candidates: Iterable[str]) -> pd.Series | Non
     return None
 
 
+
+def _cache_key(ticker: str) -> str:
+    return ticker.replace(".", "_").replace("-", "_")
+
+
+def _read_cached_frame(path: Path) -> pd.DataFrame:
+    if not path.exists():
+        return pd.DataFrame()
+    try:
+        out = pd.read_csv(path, index_col=0, parse_dates=True)
+        out.index = pd.to_datetime(out.index).tz_localize(None)
+        return out
+    except Exception:
+        return pd.DataFrame()
+
+
+def _write_cached_frame(frame: pd.DataFrame, path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    frame.to_csv(path)
+
+
+def _download_with_retries(tickers: list[str] | str, **kwargs) -> pd.DataFrame:
+    frame = pd.DataFrame()
+    for attempt in range(4):
+        try:
+            frame = yf.download(
+                tickers,
+                start=START_DATE,
+                auto_adjust=False,
+                progress=False,
+                threads=False,
+                **kwargs,
+            )
+        except Exception:
+            frame = pd.DataFrame()
+        if frame is not None and not frame.empty:
+            return frame
+        time.sleep(REQUEST_SLEEP_SECONDS * (attempt + 1))
+    return pd.DataFrame()
+
+
+def get_prices(banks: list[Bank]) -> dict[str, pd.Series]:
+    listed = [bank for bank in banks if bank.public_listing and bank.ticker]
+    tickers = [bank.ticker for bank in listed if bank.ticker]
+    raw = _download_with_retries(tickers, group_by="ticker")
+    prices: dict[str, pd.Series] = {}
+    if raw.empty:
+        return prices
+    for bank in listed:
+        assert bank.ticker is not None
+        close = pd.Series(dtype=float)
+        try:
+            if isinstance(raw.columns, pd.MultiIndex):
+                if bank.ticker in raw.columns.get_level_values(0):
+                    close = raw[(bank.ticker, "Close")]
+                elif "Close" in raw.columns.get_level_values(0):
+                    close = raw["Close"][bank.ticker]
+            elif "Close" in raw:
+                close = raw["Close"]
+        except Exception:
+            close = pd.Series(dtype=float)
+        if close is None or close.empty:
+            continue
+        close.index = pd.to_datetime(close.index).tz_localize(None)
+        close = pd.to_numeric(close, errors="coerce").dropna()
+        if not close.empty:
+            prices[bank.name] = close * bank.price_scale
+    return prices
+
 def get_balance_sheet(bank: Bank) -> pd.DataFrame:
     assert bank.ticker is not None
+    cache_path = SOURCE_CACHE_DIR / f"balance_sheet_{_cache_key(bank.ticker)}.csv"
+    cached = _read_cached_frame(cache_path)
+    if not cached.empty:
+        return cached
     ticker = yf.Ticker(bank.ticker)
     statements = []
     for attr in ["quarterly_balance_sheet", "balance_sheet"]:
@@ -172,6 +247,7 @@ def get_balance_sheet(bank: Bank) -> pd.DataFrame:
     out = out[(out["total_assets"] > 0) & (out["book_equity"] > 0)]
     out["book_debt"] = out["total_assets"] - out["book_equity"]
     out["book_leverage"] = out["total_assets"] / out["book_equity"]
+    _write_cached_frame(out, cache_path)
     return out
 
 
@@ -199,13 +275,20 @@ def get_price(bank: Bank) -> pd.Series:
 
 def get_shares(bank: Bank, dates: pd.DatetimeIndex) -> tuple[pd.Series, str]:
     assert bank.ticker is not None
+    cache_path = SOURCE_CACHE_DIR / f"shares_{_cache_key(bank.ticker)}.csv"
+    cached = _read_cached_frame(cache_path)
+    if not cached.empty and "shares" in cached:
+        shares = cached["shares"].dropna()
+        out = shares.reindex(dates.union(shares.index)).sort_index().ffill().reindex(dates)
+        return out, "cached_yfinance"
     ticker = yf.Ticker(bank.ticker)
     shares = pd.Series(dtype=float)
     source = "unavailable"
-    try:
-        shares = ticker.get_shares_full(start=START_DATE)
-    except Exception:
-        shares = pd.Series(dtype=float)
+    if USE_HISTORICAL_SHARES:
+        try:
+            shares = ticker.get_shares_full(start=START_DATE)
+        except Exception:
+            shares = pd.Series(dtype=float)
     if shares is not None and len(shares) > 0:
         shares = pd.Series(shares)
         shares.index = pd.to_datetime(shares.index).tz_localize(None)
@@ -227,6 +310,7 @@ def get_shares(bank: Bank, dates: pd.DatetimeIndex) -> tuple[pd.Series, str]:
             source = "latest_yfinance"
     if shares is None or shares.empty:
         return pd.Series(index=dates, dtype=float), source
+    _write_cached_frame(pd.DataFrame({"shares": shares.sort_index()}), cache_path)
     out = shares.reindex(dates.union(shares.index)).sort_index().ffill().reindex(dates)
     return out, source
 
@@ -242,6 +326,7 @@ def build_panel() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     quarterly_assets: dict[str, pd.Series] = {}
     quarterly_equity: dict[str, pd.Series] = {}
     coverage_rows = []
+    prices = get_prices(BANKS)
 
     for bank in BANKS:
         if not bank.public_listing:
@@ -267,7 +352,7 @@ def build_panel() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         time.sleep(REQUEST_SLEEP_SECONDS)
         try:
             bs = get_balance_sheet(bank)
-            price = get_price(bank)
+            price = prices.get(bank.name, pd.Series(dtype=float))
         except Exception as exc:
             coverage_rows.append(
                 {
@@ -406,6 +491,7 @@ def plot_overview(daily: pd.DataFrame, quarterly: pd.DataFrame) -> None:
 def main() -> None:
     warnings.filterwarnings("ignore", category=FutureWarning)
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    SOURCE_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     try:
         yf.set_tz_cache_location(str(CACHE_DIR))
         yf.cache.set_cache_location(str(CACHE_DIR))

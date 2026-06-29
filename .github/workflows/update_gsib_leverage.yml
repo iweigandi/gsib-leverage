@@ -21,12 +21,23 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Restore source-data cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/source-data
+          key: gsib-source-data-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            gsib-source-data-${{ runner.os }}-
+
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Build leverage proxies
+        env:
+          YF_REQUEST_SLEEP_SECONDS: "8"
+          GSIB_USE_HISTORICAL_SHARES: "0"
         run: python gsib_leverage.py
 
       - name: Install LaTeX
