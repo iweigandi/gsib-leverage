@@ -29,7 +29,7 @@ where \(A_{i,t}\) is total assets and \(E^{book}_{i,t}\) is book equity. Daily m
 ML_{i,t} = \frac{D^{book}_{i,q(t)} + E^{mkt}_{i,t}}{E^{mkt}_{i,t}},
 \]
 
-where \(D^{book}_{i,q(t)} = A_{i,q(t)} - E^{book}_{i,q(t)}\) is book debt from the latest available balance-sheet observation and \(E^{mkt}_{i,t}\) is daily market capitalization. Aggregate leverage is computed from aggregate assets, book equity, book debt, and market equity rather than as an equal-weighted average across banks.
+where \(D^{book}_{i,q(t)} = A_{i,q(t)} - E^{book}_{i,q(t)}\) is book debt from the latest available balance-sheet observation and \(E^{mkt}_{i,t}\) is daily market capitalization. Non-USD balance-sheet and market-equity components are converted to US dollars before aggregation. Aggregate leverage is computed from aggregate assets, book equity, book debt, and market equity rather than as an equal-weighted average across banks.
 
 These measures are proxies. They are not regulatory leverage ratios and should not be read as substitutes for supervisory capital metrics.
 

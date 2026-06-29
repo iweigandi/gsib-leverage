@@ -16,7 +16,7 @@
 }
 
 \title{Public G-SIB Leverage Proxies}
-\author{Iván Weigandi}
+\author{IvÃ¡n Weigandi}
 \date{\today}
 
 \begin{document}
@@ -26,7 +26,7 @@
 
 Large internationally active banks are central intermediaries in global financial markets. Their leverage summarizes the scale of balance-sheet exposures relative to capital and is therefore informative about risk-bearing capacity, deleveraging pressure, and the transmission of financial shocks. In intermediary-based accounts of asset pricing and global liquidity, fluctuations in intermediary net worth can affect risk premia, credit supply, and cross-border financial conditions \citep{adrianshin2010,hekrishnamurthy2013,brunnermeierpedersen2009}. For this reason, leverage measures for global systemically important banks (G-SIBs) are useful indicators for empirical work on financial cycles and systemic risk.
 
-This project provides two complementary public-data proxies. The first is a quarterly book leverage measure based on accounting assets and book equity. The second is a daily market leverage measure that combines book debt with the market value of equity. The quarterly measure follows the balance-sheet reporting frequency, while the daily measure responds to changes in equity valuations and therefore provides a higher-frequency signal of changes in bank capitalization.
+This project provides two complementary public-data proxies. The first is a quarterly book leverage measure based on accounting assets and book equity. The second is a daily market leverage measure that combines book debt with the market value of equity. Non-dollar components are converted into US dollars before computing aggregate quantities. The quarterly measure follows the balance-sheet reporting frequency, while the daily measure responds to changes in equity valuations and therefore provides a higher-frequency signal of changes in bank capitalization.
 
 \section{Sample}
 
@@ -60,7 +60,7 @@ ML^{agg}_{t} =
 \frac{\sum_i D^{book}_{i,q(t)} + \sum_i E^{mkt}_{i,t}}
 {\sum_i E^{mkt}_{i,t}}.
 \end{equation}
-This aggregation gives larger institutions proportionally larger weight through their balance sheets and market capitalization.
+This aggregation gives larger institutions proportionally larger weight through their balance sheets and market capitalization. The script also reports an aggregate leverage innovation, computed as the residual from a first-order autoregression of aggregate market leverage, and a PCA-adjusted granular instrumental-variable series constructed from idiosyncratic bank-level leverage innovations weighted by lagged asset shares.
 
 \section{Interpretation}
 
