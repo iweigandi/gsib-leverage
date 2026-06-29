@@ -1,9 +1,20 @@
 bank,ticker,cik,sec_scope,notes
-JPMorgan Chase,JPM,0000019617,US 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
-Bank of America,BAC,0000070858,US 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
-Citigroup,C,0000831001,US 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
-Goldman Sachs,GS,0000886982,US 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
-Morgan Stanley,MS,0000895421,US 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
-Wells Fargo,WFC,0000072971,US 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
-Bank of New York Mellon,BK,0001390777,US 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
-State Street,STT,0000093751,US 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
+JPMorgan Chase,JPM,0000019617,US domestic 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
+Bank of America,BAC,0000070858,US domestic 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
+Citigroup,C,0000831001,US domestic 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
+Goldman Sachs,GS,0000886982,US domestic 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
+Morgan Stanley,MS,0000895421,US domestic 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
+Wells Fargo,WFC,0000072971,US domestic 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
+Bank of New York Mellon,BK,0001390777,US domestic 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
+State Street,STT,0000093751,US domestic 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
+Royal Bank of Canada,RY,0001000275,Canadian SEC registrant / 40-F,companyfacts download failed: HTTP Error 403: Forbidden
+Toronto-Dominion Bank,TD,0000947263,Canadian SEC registrant / 40-F,companyfacts download failed: HTTP Error 403: Forbidden
+HSBC,HSBC,0001089113,Foreign private issuer / 20-F,companyfacts download failed: HTTP Error 403: Forbidden
+Barclays,BCS,0000312069,Foreign private issuer / 20-F,companyfacts download failed: HTTP Error 403: Forbidden
+Deutsche Bank,DB,0001159508,Foreign private issuer / 20-F,companyfacts download failed: HTTP Error 403: Forbidden
+ING Groep,ING,0001039765,Foreign private issuer / 20-F,companyfacts download failed: HTTP Error 403: Forbidden
+Banco Santander,SAN,0000891478,Foreign private issuer / 20-F,companyfacts download failed: HTTP Error 403: Forbidden
+UBS Group,UBS,0001610520,Foreign private issuer / 20-F,companyfacts download failed: HTTP Error 403: Forbidden
+Mitsubishi UFJ Financial Group,MUFG,0000067088,Foreign private issuer / 20-F,companyfacts download failed: HTTP Error 403: Forbidden
+Sumitomo Mitsui Financial Group,SMFG,0001022837,Foreign private issuer / 20-F,companyfacts download failed: HTTP Error 403: Forbidden
+Mizuho Financial Group,MFG,0001335730,Foreign private issuer / 20-F,companyfacts download failed: HTTP Error 403: Forbidden
