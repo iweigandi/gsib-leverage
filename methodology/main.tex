@@ -1,0 +1,97 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{xcolor}
+
+\definecolor{IWBlue}{HTML}{00466F}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=IWBlue,
+  citecolor=IWBlue,
+  urlcolor=IWBlue
+}
+
+\title{Public G-SIB Leverage Proxies}
+\author{Iván Weigandi}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Motivation}
+
+Large internationally active banks are central intermediaries in global financial markets. Their leverage summarizes the scale of balance-sheet exposures relative to capital and is therefore informative about risk-bearing capacity, deleveraging pressure, and the transmission of financial shocks. In intermediary-based accounts of asset pricing and global liquidity, fluctuations in intermediary net worth can affect risk premia, credit supply, and cross-border financial conditions \citep{adrianshin2010,hekrishnamurthy2013,brunnermeierpedersen2009}. For this reason, leverage measures for global systemically important banks (G-SIBs) are useful indicators for empirical work on financial cycles and systemic risk.
+
+This project provides two complementary public-data proxies. The first is a quarterly book leverage measure based on accounting assets and book equity. The second is a daily market leverage measure that combines book debt with the market value of equity. The quarterly measure follows the balance-sheet reporting frequency, while the daily measure responds to changes in equity valuations and therefore provides a higher-frequency signal of changes in bank capitalization.
+
+\section{Sample}
+
+The sample is based on the Financial Stability Board G-SIB universe. Institutions without listed group equity are excluded from the market-based panel because daily market leverage requires an observable equity price. The coverage file reports the listing and data availability status for each institution.
+
+\section{Definitions}
+
+For bank \(i\) and balance-sheet date \(q\), quarterly book leverage is defined as
+\begin{equation}
+BL_{i,q} = \frac{A_{i,q}}{E^{book}_{i,q}},
+\end{equation}
+where \(A_{i,q}\) denotes total assets and \(E^{book}_{i,q}\) denotes book equity.
+
+Daily market leverage is defined as
+\begin{equation}
+ML_{i,t} = \frac{D^{book}_{i,q(t)} + E^{mkt}_{i,t}}{E^{mkt}_{i,t}},
+\end{equation}
+where
+\begin{equation}
+D^{book}_{i,q(t)} = A_{i,q(t)} - E^{book}_{i,q(t)}
+\end{equation}
+is book debt from the latest available balance-sheet observation and \(E^{mkt}_{i,t}\) is daily market capitalization. The construction treats book debt as fixed between accounting observations and allows the market value of equity to vary daily.
+
+Aggregate book leverage is computed as
+\begin{equation}
+BL^{agg}_{q} = \frac{\sum_i A_{i,q}}{\sum_i E^{book}_{i,q}},
+\end{equation}
+and aggregate market leverage is computed as
+\begin{equation}
+ML^{agg}_{t} =
+\frac{\sum_i D^{book}_{i,q(t)} + \sum_i E^{mkt}_{i,t}}
+{\sum_i E^{mkt}_{i,t}}.
+\end{equation}
+This aggregation gives larger institutions proportionally larger weight through their balance sheets and market capitalization.
+
+\section{Interpretation}
+
+The book leverage proxy is close to the accounting concept of assets relative to book equity, but it is not a regulatory leverage ratio. The daily market leverage proxy is more sensitive to market valuations because a fall in bank equity prices raises measured market leverage even if reported assets and book debt have not yet changed. This makes the daily measure useful for tracking high-frequency stress in the listed G-SIB sector, while the quarterly book measure is better suited to slower-moving balance-sheet comparisons.
+
+\section{Data}
+
+The script uses public market prices, shares outstanding, and financial statement fields available through Yahoo Finance. Coverage depends on the availability and consistency of these fields across jurisdictions and listing venues. For London-listed shares, prices are converted from pence to pounds before computing market capitalization.
+
+\begin{thebibliography}{9}
+
+\bibitem[Adrian and Shin(2010)]{adrianshin2010}
+Adrian, T. and H. S. Shin (2010).
+Liquidity and leverage.
+\textit{Journal of Financial Intermediation}, 19(3), 418--437.
+
+\bibitem[Brunnermeier and Pedersen(2009)]{brunnermeierpedersen2009}
+Brunnermeier, M. K. and L. H. Pedersen (2009).
+Market liquidity and funding liquidity.
+\textit{Review of Financial Studies}, 22(6), 2201--2238.
+
+\bibitem[He and Krishnamurthy(2013)]{hekrishnamurthy2013}
+He, Z. and A. Krishnamurthy (2013).
+Intermediary asset pricing.
+\textit{American Economic Review}, 103(2), 732--770.
+
+\bibitem[Financial Stability Board(2025)]{fsb2025}
+Financial Stability Board (2025).
+2025 list of global systemically important banks.
+\url{https://www.fsb.org/2025/11/2025-list-of-global-systemically-important-banks-g-sibs/}.
+
+\end{thebibliography}
+
+\end{document}

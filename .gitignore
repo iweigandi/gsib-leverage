@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+methodology/*.aux
+methodology/*.bbl
+methodology/*.blg
+methodology/*.fls
+methodology/*.fdb_latexmk
+methodology/*.log
+methodology/*.out
+methodology/*.toc
+
+.cache/

@@ -1,0 +1,48 @@
+name: Update G-SIB leverage proxies
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 8 3 * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build leverage proxies
+        run: python gsib_leverage.py
+
+      - name: Install LaTeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y latexmk texlive-latex-base texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra
+
+      - name: Compile methodology PDF
+        working-directory: methodology
+        run: latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
+
+      - name: Copy methodology PDF
+        run: cp methodology/main.pdf Methodology.pdf
+
+      - name: Commit refreshed outputs
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update G-SIB leverage proxies"
+          file_pattern: "data/*.csv chart/*.png Methodology.pdf README.md methodology/main.tex gsib_leverage.py requirements.txt"
