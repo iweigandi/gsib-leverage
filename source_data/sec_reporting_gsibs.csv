@@ -1,0 +1,9 @@
+bank,ticker,cik,sec_scope,notes
+JPMorgan Chase,JPM,0000019617,US 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
+Bank of America,BAC,0000070858,US 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
+Citigroup,C,0000831001,US 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
+Goldman Sachs,GS,0000886982,US 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
+Morgan Stanley,MS,0000895421,US 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
+Wells Fargo,WFC,0000072971,US 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
+Bank of New York Mellon,BK,0001390777,US 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden
+State Street,STT,0000093751,US 10-K/10-Q filer,companyfacts download failed: HTTP Error 403: Forbidden

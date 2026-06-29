@@ -34,6 +34,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Fetch SEC balance sheets
+        env:
+          SEC_USER_AGENT: "iweigandi gsib-public-leverage research iweigandi@users.noreply.github.com"
+        run: python scripts/fetch_sec_balance_sheets.py --write
+
       - name: Build leverage proxies
         env:
           YF_REQUEST_SLEEP_SECONDS: "8"
@@ -56,4 +61,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Update G-SIB leverage proxies"
-          file_pattern: "data/*.csv chart/*.png source_data/*.csv Methodology.pdf README.md methodology/main.tex gsib_leverage.py requirements.txt"
+          file_pattern: "data/*.csv chart/*.png source_data/*.csv scripts/*.py Methodology.pdf README.md methodology/main.tex gsib_leverage.py requirements.txt"
