@@ -5,9 +5,9 @@ import csv
 import json
 import os
 from pathlib import Path
-from urllib.request import Request, urlopen
 
 import pandas as pd
+import requests
 
 ROOT = Path(__file__).resolve().parents[1]
 OFFICIAL_BALANCE_SHEETS = ROOT / "source_data" / "official_balance_sheets.csv"
@@ -56,9 +56,14 @@ OFFICIAL_COLUMNS = [
 
 
 def fetch_json(url: str) -> dict:
-    req = Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/json", "Accept-Encoding": "identity"})
-    with urlopen(req, timeout=45) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    headers = {
+        "User-Agent": USER_AGENT,
+        "Accept": "application/json",
+        "Accept-Encoding": "identity",
+    }
+    response = requests.get(url, headers=headers, timeout=45)
+    response.raise_for_status()
+    return response.json()
 
 
 def _available_facts(companyfacts: dict, tag: str) -> list[dict]:
