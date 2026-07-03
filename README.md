@@ -4,6 +4,8 @@ This repository publishes a reproducible public-data measure of market leverage 
 
 The project complements research based on book leverage. Book leverage remains the more direct measure of bank balance-sheet capacity, but market leverage can be observed at higher frequency and reflects changes in market equity values.
 
+![G-SIB market leverage decomposition](chart/gsib_market_leverage_decomposition.png)
+
 ## Outputs
 
 - `data/gsib_market_leverage.csv`: daily market leverage and cumulative decomposition components.
