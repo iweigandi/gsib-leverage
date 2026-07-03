@@ -2,6 +2,11 @@ __pycache__/
 *.pyc
 .venv/
 .ipynb_checkpoints/
+.cache/
+.tmp_patch_gsib.py
+source_data/financial statements/
+source_data/*.pdf
+source_data/*.zip
 methodology/*.aux
 methodology/*.bbl
 methodology/*.blg
@@ -11,4 +16,19 @@ methodology/*.log
 methodology/*.out
 methodology/*.toc
 
-.cache/
+.tmp_patch_factor.py
+
+.tmp_patch_onechart.py
+
+.tmp_patch_level_decomp.py
+
+.tmp_patch_chart_simple.py
+.tmp_layout_check*.py
+.tmp_*.py
+methodology/*.pdf
+methodology/*.synctex.gz
+methodology/*.nav
+methodology/*.snm
+methodology/*.vrb
+Methodology.pdf
+methodology/

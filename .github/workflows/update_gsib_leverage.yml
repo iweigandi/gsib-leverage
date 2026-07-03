@@ -1,4 +1,4 @@
-name: Update G-SIB leverage proxies
+name: Update G-SIB market leverage
 
 on:
   workflow_dispatch:
@@ -36,29 +36,17 @@ jobs:
 
       - name: Fetch SEC balance sheets
         env:
-          SEC_USER_AGENT: "iweigandi gsib-public-leverage research iweigandi@users.noreply.github.com"
+          SEC_USER_AGENT: "iweigandi gsib-leverage research iweigandi@users.noreply.github.com"
         run: python scripts/fetch_sec_balance_sheets.py --write
 
-      - name: Build leverage proxies
+      - name: Build market leverage series
         env:
           YF_REQUEST_SLEEP_SECONDS: "8"
           GSIB_USE_HISTORICAL_SHARES: "0"
         run: python gsib_leverage.py
-
-      - name: Install LaTeX
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y latexmk texlive-latex-base texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra
-
-      - name: Compile methodology PDF
-        working-directory: methodology
-        run: latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
-
-      - name: Copy methodology PDF
-        run: cp methodology/main.pdf Methodology.pdf
-
       - name: Commit refreshed outputs
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Update G-SIB leverage proxies"
-          file_pattern: "data/*.csv chart/*.png source_data/*.csv scripts/*.py Methodology.pdf README.md methodology/main.tex gsib_leverage.py requirements.txt"
+          commit_message: "Update G-SIB market leverage"
+          file_pattern: "data/gsib_market_leverage.csv chart/gsib_market_leverage_decomposition.png source_data/*.csv scripts/*.py README.md SOURCES.md gsib_leverage.py requirements.txt"
+
