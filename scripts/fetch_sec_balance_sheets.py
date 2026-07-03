@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OFFICIAL_BALANCE_SHEETS = ROOT / "source_data" / "official_balance_sheets.csv"
 SEC_MAPPING = ROOT / "source_data" / "sec_reporting_gsibs.csv"
 SEC_COMPANYFACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json"
-USER_AGENT = os.environ.get("SEC_USER_AGENT", "iweigandi gsib-public-leverage research iweigandi@users.noreply.github.com")
+USER_AGENT = os.environ.get("SEC_USER_AGENT", "Ivo Weigandi University of Leeds iweigandi@leeds.ac.uk")
 
 # SEC scope is broader than US domestic filers. The first group files 10-K/10-Q
 # using US GAAP; the rest are SEC registrants/ADR issuers that generally file
@@ -52,6 +52,16 @@ FORMS = {"10-K", "10-Q", "20-F", "40-F", "6-K"}
 OFFICIAL_COLUMNS = [
     "bank", "ticker", "period_end", "total_assets", "book_equity", "currency",
     "statement_frequency", "source_document", "source_url", "source_page", "notes",
+]
+
+KNOWN_SEC_CORRECTIONS = [
+    {
+        "bank": "Barclays",
+        "period_end": "2017-06-30",
+        "field": "total_assets",
+        "multiplier": 1000,
+        "note": "Scale corrected: total assets multiplied by 1000 after continuity check.",
+    },
 ]
 
 
@@ -107,6 +117,22 @@ def infer_frequency(fp: object, form: object) -> str:
     return "annual" if form in {"10-K", "20-F", "40-F"} or fp == "FY" else "quarterly_or_interim"
 
 
+def apply_known_sec_corrections(sec_rows: pd.DataFrame) -> pd.DataFrame:
+    if sec_rows.empty:
+        return sec_rows
+    out = sec_rows.copy()
+    for correction in KNOWN_SEC_CORRECTIONS:
+        mask = out["bank"].eq(correction["bank"]) & out["period_end"].eq(correction["period_end"])
+        if not mask.any():
+            continue
+        field = correction["field"]
+        out.loc[mask, field] = (pd.to_numeric(out.loc[mask, field], errors="coerce") * correction["multiplier"]).round().astype("Int64")
+        existing_notes = out.loc[mask, "notes"].fillna("").astype(str)
+        note = correction["note"]
+        out.loc[mask, "notes"] = existing_notes.where(existing_notes.str.contains(note, regex=False), existing_notes + " " + note).str.strip()
+    return out
+
+
 def build_sec_rows() -> tuple[pd.DataFrame, pd.DataFrame]:
     output_rows = []
     mapping_rows = []
@@ -153,7 +179,8 @@ def build_sec_rows() -> tuple[pd.DataFrame, pd.DataFrame]:
                 "source_page": "",
                 "notes": f"form={row.get('form_assets')}; filed={row.get('filed_assets')}",
             })
-    return pd.DataFrame(output_rows, columns=OFFICIAL_COLUMNS), pd.DataFrame(mapping_rows)
+    sec_rows = pd.DataFrame(output_rows, columns=OFFICIAL_COLUMNS)
+    return apply_known_sec_corrections(sec_rows), pd.DataFrame(mapping_rows)
 
 
 def write_official_table(sec_rows: pd.DataFrame) -> None:

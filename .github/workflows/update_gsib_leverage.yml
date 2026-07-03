@@ -36,7 +36,7 @@ jobs:
 
       - name: Fetch SEC balance sheets
         env:
-          SEC_USER_AGENT: "iweigandi gsib-leverage research iweigandi@users.noreply.github.com"
+          SEC_USER_AGENT: "Ivo Weigandi University of Leeds iweigandi@leeds.ac.uk"
         run: python scripts/fetch_sec_balance_sheets.py --write
 
       - name: Build market leverage series
