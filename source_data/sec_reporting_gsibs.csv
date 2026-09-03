@@ -1,10 +1,10 @@
 bank,ticker,cik,sec_scope,notes
-JPMorgan Chase,JPM,0000019617,US domestic 10-K/10-Q filer,rows=69; assets=us-gaap:Assets; equity=us-gaap:StockholdersEquity; unit=USD
+JPMorgan Chase,JPM,0000019617,US domestic 10-K/10-Q filer,rows=70; assets=us-gaap:Assets; equity=us-gaap:StockholdersEquity; unit=USD
 Bank of America,BAC,0000070858,US domestic 10-K/10-Q filer,rows=69; assets=us-gaap:Assets; equity=us-gaap:StockholdersEquity; unit=USD
 Citigroup,C,0000831001,US domestic 10-K/10-Q filer,rows=67; assets=us-gaap:Assets; equity=us-gaap:StockholdersEquity; unit=USD
-Goldman Sachs,GS,0000886982,US domestic 10-K/10-Q filer,rows=70; assets=us-gaap:Assets; equity=us-gaap:StockholdersEquity; unit=USD
-Morgan Stanley,MS,0000895421,US domestic 10-K/10-Q filer,rows=70; assets=us-gaap:Assets; equity=us-gaap:StockholdersEquity; unit=USD
-Wells Fargo,WFC,0000072971,US domestic 10-K/10-Q filer,rows=69; assets=us-gaap:Assets; equity=us-gaap:StockholdersEquity; unit=USD
+Goldman Sachs,GS,0000886982,US domestic 10-K/10-Q filer,rows=71; assets=us-gaap:Assets; equity=us-gaap:StockholdersEquity; unit=USD
+Morgan Stanley,MS,0000895421,US domestic 10-K/10-Q filer,rows=71; assets=us-gaap:Assets; equity=us-gaap:StockholdersEquity; unit=USD
+Wells Fargo,WFC,0000072971,US domestic 10-K/10-Q filer,rows=70; assets=us-gaap:Assets; equity=us-gaap:StockholdersEquity; unit=USD
 Bank of New York Mellon,BK,0001390777,US domestic 10-K/10-Q filer,rows=70; assets=us-gaap:Assets; equity=us-gaap:StockholdersEquity; unit=USD
 State Street,STT,0000093751,US domestic 10-K/10-Q filer,rows=70; assets=us-gaap:Assets; equity=us-gaap:StockholdersEquity; unit=USD
 Royal Bank of Canada,RY,0001000275,Canadian SEC registrant / 40-F,rows=31; assets=ifrs-full:Assets; equity=ifrs-full:Equity; unit=CAD
